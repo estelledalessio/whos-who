@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07100f">
+<title>Who's Who?</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600&display=swap');
+:root{--bg:#07100f;--card:#101c19;--line:#2e3a34;--cream:#f1dfbd;--text:#f7f1e6;--muted:#a9aaa4;--gold:#c9a36d}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% -10%,rgba(201,163,109,.14),transparent 34%),linear-gradient(180deg,#08110f,#050908 90%);color:var(--text);font-family:"DM Sans",system-ui,sans-serif}
+button,input,textarea,select{font:inherit}button{cursor:pointer}
+#app{max-width:520px;margin:auto;min-height:100vh;padding:24px 20px 44px}
+.shell{min-height:calc(100vh - 68px);display:flex;flex-direction:column}
+.top{display:flex;align-items:center;justify-content:space-between;min-height:42px;margin-bottom:18px}
+.brand,h1,h2,h3{font-family:"Playfair Display",serif;font-weight:500}
+.brand{font-size:18px}.hero{padding:60px 0 28px;text-align:center}.star{font-size:29px;color:var(--gold);margin-bottom:24px}
+h1{font-size:64px;line-height:.88;letter-spacing:-.04em;margin:0}h2{font-size:34px;line-height:1.05;margin:0}h3{font-size:25px;margin:0}
+.subtitle{color:#d9d8d1;max-width:340px;margin:24px auto 0;line-height:1.55}.tagline{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);margin-top:54px}
+.card{background:linear-gradient(180deg,rgba(20,34,30,.98),rgba(11,20,18,.98));border:1px solid var(--line);border-radius:20px;padding:18px}
+.stack{display:grid;gap:12px}.btn{width:100%;border:0;border-radius:16px;padding:16px 18px;font-weight:700;background:var(--cream);color:#16120d}
+.btn.secondary{background:transparent;color:var(--text);border:1px solid #6d6558}.btn:disabled{opacity:.4}
+.field{display:grid;gap:8px}label{font-size:13px;color:#d5d1c7}
+input,textarea,select{width:100%;background:#0b1412;border:1px solid var(--line);border-radius:14px;padding:15px;color:var(--text);outline:none}
+textarea{min-height:110px;resize:none}.iconbtn{border:1px solid var(--line);background:#0c1513;color:var(--text);border-radius:999px;width:42px;height:42px}
+.mode{display:flex;align-items:center;gap:14px;text-align:left;border:1px solid var(--line);background:#0d1715;border-radius:16px;padding:15px;color:var(--text)}
+.mode.selected{border-color:var(--gold);background:#151b17}.mode.disabled{opacity:.42}.mode .emoji{font-size:22px;width:30px;text-align:center}
+.mode b{display:block;font-family:"Playfair Display",serif;font-size:18px}.mode small{color:var(--muted)}
+.pills{display:flex;gap:8px;flex-wrap:wrap}.pill{padding:10px 12px;border-radius:999px;border:1px solid var(--line);background:#0d1715;color:var(--text)}
+.pill.selected{background:var(--cream);color:#16120d;border-color:var(--cream)}
+.roomcode{font-size:34px;font-weight:700;letter-spacing:.12em;text-align:center;color:var(--cream)}
+.player{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #22302b}.player:last-child{border-bottom:0}
+.playerleft{display:flex;align-items:center;gap:12px}.avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#dac49e;color:#19150f;font-weight:700}
+.score{color:var(--gold);font-weight:700}.small{font-size:12px}.muted{color:var(--muted)}.center{text-align:center}.spacer{flex:1}
+.question{font-family:"Playfair Display",serif;font-size:30px;line-height:1.17;text-align:center;padding:38px 10px}
+.progress{height:4px;background:#27322e;border-radius:999px;overflow:hidden;margin-bottom:26px}.progress i{display:block;height:100%;background:var(--cream)}
+.mask{font-size:34px;text-align:center;margin:14px 0;color:var(--cream)}.answer{padding:14px 15px;border:1px solid var(--line);border-radius:14px;background:#0b1412;margin-top:9px}
+.votegrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0}.votebtn{border:1px solid var(--line);background:#0d1715;color:var(--text);padding:15px 10px;border-radius:15px}
+.votebtn.selected{border-color:var(--cream);box-shadow:0 0 0 1px var(--cream) inset}
+.bigavatar{width:92px;height:92px;border-radius:50%;margin:22px auto 14px;display:grid;place-items:center;background:var(--cream);color:#17120d;font-size:38px;font-weight:700}
+.wait{padding:48px 10px;text-align:center}.dots{letter-spacing:.35em;color:var(--gold);margin:16px 0}
+.toast,.error{position:fixed;left:20px;right:20px;bottom:24px;max-width:480px;margin:auto;border-radius:15px;padding:14px 16px;z-index:4}
+.toast{background:#18251f;border:1px solid #4b6456}.error{background:#3b201e;border:1px solid #7a4944;color:#ffd8d3}
+@media(max-width:360px){h1{font-size:54px}.question{font-size:26px}}
+</style>
+</head>
+<body>
+<main id="app"><div style="padding:60px 0;text-align:center;color:#f1dfbd">Loading Who’s Who?…</div></main>
+<script>
+(function(){
+"use strict";
+var API="https://qkgxwporlkfyyojpredw.supabase.co/functions/v1/game-api";
+var S={
+ screen:"home",mode:"imposter",vibe:"everything",rounds:5,name:"",
+ playerToken:localStorage.getItem("ww_player")||"",
+ hostToken:localStorage.getItem("ww_host")||"",
+ playerId:localStorage.getItem("ww_pid")||"",
+ state:null,selectedVote:null,timer:null,answerDraft:""
+};
+function q(sel){return document.querySelector(sel)}
+function e(x){return String(x==null?"":x).replace(/[&<>"']/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]})}
+function ini(n){return String(n||"?").trim().slice(0,1).toUpperCase()}
+function note(msg,bad){var d=document.createElement("div");d.className=bad?"error":"toast";d.textContent=msg;document.body.appendChild(d);setTimeout(function(){d.remove()},2600)}
+async function api(payload){
+ var r=await fetch(API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+ var j=await r.json().catch(function(){return {error:"Invalid server response"}});
+ if(!r.ok||j.error){note(j.error||"Request failed",true);throw new Error(j.error||"Request failed")}
+ return j
+}
+function save(j){
+ if(j.player_token){S.playerToken=j.player_token;localStorage.setItem("ww_player",j.player_token)}
+ if(j.host_token){S.hostToken=j.host_token;localStorage.setItem("ww_host",j.host_token)}
+ if(j.player_id){S.playerId=j.player_id;localStorage.setItem("ww_pid",j.player_id)}
+ if(j.state)S.state=j.state
+}
+function clearSession(){
+ ["ww_player","ww_host","ww_pid"].forEach(function(k){localStorage.removeItem(k)});
+ clearInterval(S.timer);
+ S.screen="home";S.mode="imposter";S.vibe="everything";S.rounds=5;S.name="";
+ S.playerToken="";S.hostToken="";S.playerId="";S.state=null;S.selectedVote=null;S.timer=null;
+ render()
+}
+function top(title){
+ return '<div class="top"><button class="iconbtn" id="backbtn">←</button><div class="brand">'+e(title||"Who's Who?")+'</div><button class="iconbtn" id="resetbtn">×</button></div>'
+}
+function home(){
+ return '<div class="shell"><div class="hero"><div class="star">✦</div><h1>Who’s<br>Who?</h1><p class="subtitle">How well do you really know your friends?</p></div>'+
+ '<div class="stack"><button class="btn" id="createBtn">Create Game →</button><button class="btn secondary" id="joinBtn">Join Game</button></div>'+
+ '<div class="spacer"></div><div class="tagline center">Same friends. Different perspectives.</div></div>'
+}
+var modes=[
+ ["imposter","🎭","Imposter","Who got the different question?",false],
+ ["who_said","◖","Who Said That?","Who wrote each answer?",true],
+ ["predict","◉","Predict Me","Can you predict what they’ll say?",true],
+ ["likely","♛","Most Likely To","Who fits the scenario?",true],
+ ["double_agent","♟","Double Agent","You know the different question. Blend in.",false],
+ ["chaos","⚄","Chaos Mode","All games. No rules.",false]
+];
+function createScreen(){
+ var mh=modes.map(function(m){
+  return '<button class="mode '+(S.mode===m[0]?'selected ':'')+(m[4]?'disabled':'')+'" data-mode="'+m[0]+'" '+(m[4]?'disabled':'')+'>'+
+  '<span class="emoji">'+m[1]+'</span><span><b>'+e(m[2])+'</b><small>'+e(m[3])+(m[4]?' · coming next':'')+'</small></span></button>'
+ }).join("");
+ var vh=["chill","juicy","unhinged","everything"].map(function(v){
+  return '<button class="pill '+(S.vibe===v?'selected':'')+'" data-vibe="'+v+'">'+v.charAt(0).toUpperCase()+v.slice(1)+'</button>'
+ }).join("");
+ return top("Create a Game")+'<div class="stack">'+
+ '<div class="field"><label>Your name</label><input id="name" maxlength="24" value="'+e(S.name)+'" placeholder="Estelle"></div>'+
+ '<div><label>Choose a mode</label><div class="stack" style="margin-top:8px">'+mh+'</div></div>'+
+ '<div><label>Vibe</label><div class="pills" style="margin-top:8px">'+vh+'</div></div>'+
+ '<div class="field"><label>Rounds</label><select id="rounds"><option>3</option><option selected>5</option><option>7</option><option>10</option></select></div>'+
+ '<button class="btn" id="makeRoom">Create Room →</button></div>'
+}
+function joinScreen(){
+ return top("Join a Game")+'<div style="padding-top:40px" class="stack"><h2 class="center">Join a Game</h2>'+
+ '<p class="muted center">Enter the room code your friend shared.</p>'+
+ '<div class="field"><label>Your name</label><input id="jname" maxlength="24" placeholder="Your name"></div>'+
+ '<div class="field"><label>Room code</label><input id="jcode" maxlength="4" placeholder="7K3P" style="text-transform:uppercase;letter-spacing:.18em;font-weight:700;font-size:22px"></div>'+
+ '<button class="btn" id="joinRoom">Join Game →</button></div>'
+}
+function lobby(){
+ var r=S.state.room,ps=S.state.players||[];
+ var people=ps.map(function(p,i){
+  return '<div class="player"><div class="playerleft"><div class="avatar">'+ini(p.name)+'</div><div>'+e(p.name)+(i===0?' <span class="small muted">· host</span>':'')+'</div></div><div class="score">'+(p.score||0)+'</div></div>'
+ }).join("");
+ var action=S.hostToken?
+ '<button class="btn" id="startRound" '+(ps.length<3?'disabled':'')+'>'+(ps.length<3?'Waiting for 3 players…':'Start Game →')+'</button>':
+ '<div class="wait"><div class="dots">•••</div>Waiting for the host to start</div>';
+ return top("Game Lobby")+'<div class="stack"><div class="card center"><div class="small muted">ROOM CODE</div><div class="roomcode">'+e(r.code)+'</div><div class="small muted">Share this code with your friends</div></div>'+
+ '<div class="card">'+people+'</div><div class="card small"><b>Mode:</b> '+e(r.mode.replace("_"," "))+'<br><br><b>Vibe:</b> '+e(r.vibe)+'<br><br><b>Rounds:</b> '+r.total_rounds+'</div>'+action+'</div>'
+}
+function roundHead(){
+ var r=S.state.room,pct=Math.max(8,(r.current_round/r.total_rounds)*100);
+ return '<div class="small center muted">Round '+r.current_round+' of '+r.total_rounds+'</div><div class="progress"><i style="width:'+pct+'%"></i></div>'
+}
+function answering(){
+ var mine=(S.state.answers||[]).some(function(a){return a.player_id===S.playerId});
+ var submitted=(S.state.answers||[]).length,total=S.state.players.length;
+ var lower=mine?
+ '<div class="wait"><h3>Answer locked in.</h3><p class="muted">'+submitted+'/'+total+' players answered.</p><div class="dots">•••</div></div>':
+ '<div class="stack" style="margin-top:14px"><textarea id="answer" maxlength="280" placeholder="Type your answer…">'+e(S.answerDraft)+'</textarea><button class="btn" id="submitAnswer">Submit Answer</button></div>';
+ var mode=S.state.round&&S.state.round.mode==="double_agent"?"Double Agent":"Imposter";
+ var icon=mode==="Double Agent"?"♟":"🎭";
+ return top(mode)+roundHead()+'<div class="mask">'+icon+'</div><div class="card"><div class="small center muted">YOUR QUESTION</div><div class="question">'+e(S.state.myPrompt||"Loading your question…")+'</div></div>'+lower
+}
+function voting(){
+ var answers=S.state.answers||[],voted=(S.state.votes||[]).some(function(v){return v.voter_player_id===S.playerId});
+ var ah=answers.map(function(a){var p=S.state.players.find(function(x){return x.id===a.player_id});var n=p?p.name:'Unknown';return '<div class="answer"><div class="small muted">'+e(n)+'</div>'+e(a.answer)+'</div>'}).join("");
+ var lower;
+ if(voted){
+  lower='<div class="wait"><h3>Vote locked in.</h3><p class="muted">'+(S.state.votes||[]).length+'/'+S.state.players.length+' players voted.</p><div class="dots">•••</div></div>'
+ }else{
+  var buttons=S.state.players.filter(function(p){return p.id!==S.playerId}).map(function(p){
+   return '<button class="votebtn '+(S.selectedVote===p.id?'selected':'')+'" data-vote="'+p.id+'"><div class="avatar" style="margin:auto auto 8px">'+ini(p.name)+'</div>'+e(p.name)+'</button>'
+  }).join("");
+  lower='<h3 class="center" style="margin-top:26px">Who’s the imposter?</h3><div class="votegrid">'+buttons+'</div><button class="btn" id="submitVote" '+(S.selectedVote?'':'disabled')+'>Submit Vote</button>'
+ }
+ return top("Discussion & Vote")+roundHead()+'<h2 class="center">Here are the answers.</h2><p class="muted center">Discuss them, then vote for who got the different question.</p><div class="card" style="margin-top:18px">'+ah+'</div>'+lower
+}
+function reveal(){
+ var imp=S.state.players.find(function(p){return p.id===S.state.imposter});
+ var finished=S.state.room.phase==="finished";
+ var right=(S.state.votes||[]).filter(function(v){return v.target_player_id===S.state.imposter}).length;
+ var rows=S.state.players.slice().sort(function(a,b){return b.score-a.score}).map(function(p,i){
+  return '<div class="player"><div class="playerleft"><span>'+(i+1)+'.</span><div class="avatar">'+ini(p.name)+'</div><div>'+e(p.name)+'</div></div><div class="score">'+p.score+'</div></div>'
+ }).join("");
+ var action=finished?'<button class="btn" id="homeAgain">Back Home</button>':(S.hostToken?'<button class="btn" id="nextRound">Next Round →</button>':'<div class="wait"><div class="dots">•••</div>Waiting for the host</div>');
+ return top(finished?"Final Reveal":"Reveal")+roundHead()+'<div class="center" style="padding-top:42px"><div class="small muted">THE IMPOSTER WAS…</div><div class="bigavatar">'+ini(imp&&imp.name)+'</div><h2>'+e(imp?imp.name:"???")+'</h2><p class="muted">'+right+' of '+S.state.players.length+' players found them.</p></div><div class="card" style="margin-top:24px"><h3>Scoreboard</h3>'+rows+'</div><div style="margin-top:14px">'+action+'</div>'
+}
+function game(){
+ if(!S.state)return '<div class="wait">Connecting…</div>';
+ var p=S.state.room.phase;
+ if(p==="lobby")return lobby();
+ if(p==="answering")return answering();
+ if(p==="voting")return voting();
+ if(p==="reveal"||p==="finished")return reveal();
+ return '<div class="wait">Loading game…</div>'
+}
+function render(){
+ var app=q("#app");
+ if(S.screen==="home")app.innerHTML=home();
+ else if(S.screen==="create")app.innerHTML=createScreen();
+ else if(S.screen==="join")app.innerHTML=joinScreen();
+ else app.innerHTML=game();
+ bind()
+}
+function bind(){
+ var ans=q("#answer");
+ if(ans)ans.oninput=function(){S.answerDraft=ans.value};
+ var b=q("#createBtn");if(b)b.onclick=function(){S.screen="create";render()};
+ b=q("#joinBtn");if(b)b.onclick=function(){S.screen="join";render()};
+ b=q("#backbtn");if(b)b.onclick=function(){clearInterval(S.timer);S.screen=S.state?"game":"home";render();if(S.state)poll()};
+ b=q("#resetbtn");if(b)b.onclick=clearSession;
+ document.querySelectorAll("[data-mode]").forEach(function(x){x.onclick=function(){S.mode=x.dataset.mode;render()}});
+ document.querySelectorAll("[data-vibe]").forEach(function(x){x.onclick=function(){S.vibe=x.dataset.vibe;render()}});
+ b=q("#makeRoom");if(b)b.onclick=async function(){
+  S.name=q("#name").value.trim();S.rounds=Number(q("#rounds").value);
+  if(!S.name)return note("Enter your name first",true);
+  var j=await api({action:"create_room",name:S.name,mode:S.mode,vibe:S.vibe,total_rounds:S.rounds});
+  save(j);S.screen="game";render();poll()
+ };
+ b=q("#joinRoom");if(b)b.onclick=async function(){
+  var name=q("#jname").value.trim(),code=q("#jcode").value.trim().toUpperCase();
+  if(!name||code.length!==4)return note("Enter your name and 4-character code",true);
+  var j=await api({action:"join_room",name:name,code:code});save(j);S.screen="game";render();poll()
+ };
+ b=q("#startRound");if(b)b.onclick=async function(){await api({action:"start_round",host_token:S.hostToken});await refresh()};
+ b=q("#nextRound");if(b)b.onclick=async function(){await api({action:"start_round",host_token:S.hostToken});await refresh()};
+ b=q("#submitAnswer");if(b)b.onclick=async function(){var a=q("#answer").value.trim();if(!a)return note("Write an answer first",true);await api({action:"submit_answer",player_token:S.playerToken,answer:a});S.answerDraft="";await refresh()};
+ document.querySelectorAll("[data-vote]").forEach(function(x){x.onclick=function(){S.selectedVote=x.dataset.vote;render()}});
+ b=q("#submitVote");if(b)b.onclick=async function(){if(!S.selectedVote)return;await api({action:"submit_vote",player_token:S.playerToken,target_player_id:S.selectedVote});S.selectedVote=null;await refresh()};
+ b=q("#homeAgain");if(b)b.onclick=clearSession
+}
+async function refresh(){
+ if(!S.playerToken)return;
+ try{
+  var oldPhase=S.state&&S.state.room?S.state.room.phase:null;
+  var newState=await api({action:"get_state",player_token:S.playerToken});
+  var newPhase=newState&&newState.room?newState.room.phase:null;
+  S.state=newState;
+  var typing=document.activeElement&&document.activeElement.id==="answer";
+  if(S.screen==="game" && !(typing && oldPhase==="answering" && newPhase==="answering"))render()
+ }catch(err){}
+}
+function poll(){clearInterval(S.timer);refresh();S.timer=setInterval(refresh,1800)}
+render();
+if(S.playerToken){S.screen="game";render();poll()}
+})();
+</script>
+</body>
+</html>
